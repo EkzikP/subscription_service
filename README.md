@@ -1,4 +1,4 @@
-# Тестовое задание Junior Golang Developer\Effective Mobile
+# Тестовое задание Junior Golang Developer  Effective Mobile
 
 Задача: спроектировать и реализовать REST-сервис для агрегации данных об онлайн-подписках пользователей.
 Требования:
