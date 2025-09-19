@@ -1,6 +1,6 @@
-<p style='text-align: center;'>
-Тестовое задание Junior Golang Developer <br> Effective Mobile
-</p>
+<h1 align="center">
+    Тестовое задание Junior Golang Developer <br> Effective Mobile
+</h1>
 
 Задача: спроектировать и реализовать REST-сервис для агрегации данных об онлайн-подписках пользователей.
 Требования:
