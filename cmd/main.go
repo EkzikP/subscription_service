@@ -2,16 +2,20 @@ package main
 
 import (
 	"log"
-	"os"
-	"subscription_service/config"
-	_ "subscription_service/docs"
+	"subscription_service/pkg/config"
+	"subscription_service/pkg/router"
+
+	//	_ "subscription_service/docs"
 	"subscription_service/pkg/repository"
 
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+var logger = logrus.New()
 
 // @title           Subscriptions Service API
 // @version         1.0
@@ -32,14 +36,41 @@ func main() {
 	cfg := config.New()
 
 	// Инициализация логгера
-	openLogFiles, err := config.InitLogrus(cfg.LogLevel)
+	openLogFiles, err := config.InitLogrus(cfg.LogLevel, logger)
 	if err != nil {
-		logrus.Error("Ошибка при настройке параметров логгера. Вывод всех ошибок будет осуществлён в консоль")
+		logger.Error("Ошибка при настройке параметров логгера. Вывод всех ошибок будет осуществлён в консоль")
 	} else {
 		// Закрытие всех открытых файлов в результате настройки логгера
 		defer openLogFiles.Close()
 	}
 
 	// Создание нового подключения к БД
-	db, err := repository.NewPostgresDB(config.PQ)
+	pool, err := repository.NewPostgresDB(cfg)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Info("Выполнено подключение к БД")
+
+	defer pool.Close()
+
+	// Миграция БД
+	err = repository.MigrateDB(cfg.ConString)
+	if err != nil {
+		if err.Error() == "no change" {
+			logger.Info("Миграция БД не требуется")
+		} else {
+			logger.Fatal(err)
+		}
+	} else {
+		logger.Info("Выполнена миграция БД")
+	}
+
+	r := router.SetRouter(pool, logger)
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	err = r.Run(":" + cfg.HttpPort)
+	if err != nil {
+		logger.Fatal(err)
+	}
 }

@@ -1,6 +1,8 @@
 package config
 
-import "os"
+import (
+	"os"
+)
 
 type PQ struct {
 	Host string
@@ -8,11 +10,14 @@ type PQ struct {
 	User string
 	Pass string
 	Name string
+	Ssl  string
 }
 
 type Config struct {
-	Db       PQ
-	LogLevel string
+	Db        PQ
+	ConString string
+	HttpPort  string
+	LogLevel  string
 }
 
 func New() *Config {
@@ -23,8 +28,11 @@ func New() *Config {
 			User: getEnv("DB_USER", "postgres"),
 			Pass: getEnv("DB_PASS", "postgres"),
 			Name: getEnv("DB_NAME", "postgres"),
+			Ssl:  getEnv("DB_SSL", "disable"),
 		},
-		LogLevel: getEnv("LOG_LEVEL", "info"),
+		ConString: "",
+		HttpPort:  getEnv("HTTP_PORT", "8080"),
+		LogLevel:  getEnv("LOG_LEVEL", "info"),
 	}
 }
 
