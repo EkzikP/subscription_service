@@ -5,7 +5,7 @@ import (
 	"subscription_service/pkg/config"
 	"subscription_service/pkg/router"
 
-	//	_ "subscription_service/docs"
+	//	_ "subscription_service_my/docs"
 	"subscription_service/pkg/repository"
 
 	"github.com/joho/godotenv"
