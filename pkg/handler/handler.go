@@ -39,12 +39,14 @@ func (h *Handler) CreateSubscription(ctx *gin.Context) {
 	}
 
 	err := h.service.CreateSubscription(ctx.Request.Context(), &req)
-	if err != nil && err.Error() == "запись уже существует" {
-		h.logger.Warn("Ошибка добавления записи, запись уже существует")
-		ctx.JSON(http.StatusConflict, model.ErrorResponse{Error: "Подписка уже существует для данного пользователя"})
-		return
-	} else if err != nil {
+	if err != nil {
+		if err.Error() == "запись уже существует" {
+			h.logger.Warn("Ошибка добавления записи, запись уже существует")
+			ctx.JSON(http.StatusConflict, model.ErrorResponse{Error: "Подписка уже существует для данного пользователя"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: err.Error()})
+		return
 	}
 
 	ctx.Status(http.StatusCreated)
