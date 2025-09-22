@@ -6,6 +6,7 @@ import (
 	"subscription_service/pkg/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,4 +48,42 @@ func (h *Handler) CreateSubscription(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusCreated)
+}
+
+// ListSubscriptions godoc
+// @Summary Список подписок
+// @Description Получить список подписок с возможностью фильтрации по пользователю и сервису
+// @Tags subscriptions
+// @Produce json
+// @Param user_id query string false "User ID"
+// @Param service_name query string false "Service Name"
+// @Success 200 {array} model.Subscription
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /subscriptions [get]
+func (h *Handler) ListSubscriptions(ctx *gin.Context) {
+	var userID *uuid.UUID
+	var serviceName *string
+
+	if userIDStr := ctx.Query("user_id"); userIDStr != "" {
+		parsedUUID, err := uuid.Parse(userIDStr)
+		if err != nil {
+			h.logger.WithError(err).Warn("Неверный формат UserID")
+			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Неверный формат UserID"})
+			return
+		}
+		userID = &parsedUUID
+	}
+
+	if serviceNameStr := ctx.Query("service_name"); serviceNameStr != "" {
+		serviceName = &serviceNameStr
+	}
+
+	subscriptions, err := h.service.ListSubscriptions(ctx.Request.Context(), userID, serviceName)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, subscriptions)
 }

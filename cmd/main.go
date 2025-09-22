@@ -146,7 +146,7 @@ func setRouter(handler *handler.Handler) *gin.Engine {
 	sub := rout.Group("/subscriptions")
 	{
 		sub.POST("", handler.CreateSubscription)
-		//		sub.GET("", handler.ListSubscriptions)
+		sub.GET("", handler.ListSubscriptions)
 		//		sub.GET("/summary", handler.GetSummary)
 		//		sub.GET("/:id", handler.GetSubscription)
 		//		sub.PUT("/:id", handler.UpdateSubscription)

@@ -10,3 +10,46 @@
 {"count":1,"level":"info","msg":"Получен список подписок","time":"2025-09-22T14:29:34+05:00"}
 {"level":"warning","msg":"Ошибка добавления записи, запись уже существует","time":"2025-09-22T14:29:34+05:00"}
 {"client_ip":"::1","duration":1055000,"level":"info","method":"POST","msg":"HTTP request","path":"/subscriptions","status":409,"time":"2025-09-22T14:29:34+05:00","user_agent":"PostmanRuntime/7.43.4"}
+{"level":"info","msg":"Выполнено подключение к БД","time":"2025-09-22T17:00:35+05:00"}
+{"level":"info","msg":"Миграция БД не требуется","time":"2025-09-22T17:00:35+05:00"}
+{"level":"info","msg":"Запуск сервера на порту 8080","time":"2025-09-22T17:00:35+05:00"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:01:21+05:00"}
+{"level":"info","msg":"Запись о подписке успешно создана","serviceName":"Yandex Plus+","time":"2025-09-22T17:01:21+05:00","userId":"60601fee-2bf1-4721-ae6f-7636e79a0cba"}
+{"client_ip":"::1","duration":5880000,"level":"info","method":"POST","msg":"HTTP request","path":"/subscriptions","status":201,"time":"2025-09-22T17:01:21+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:01:47+05:00"}
+{"level":"info","msg":"Запись о подписке успешно создана","serviceName":"Yandex Plus+","time":"2025-09-22T17:01:47+05:00","userId":"60601fee-2bf1-4721-ae6f-7636e79a0cbb"}
+{"client_ip":"::1","duration":1589300,"level":"info","method":"POST","msg":"HTTP request","path":"/subscriptions","status":201,"time":"2025-09-22T17:01:47+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":3,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:03:05+05:00"}
+{"client_ip":"::1","duration":756600,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:03:05+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":2,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:03:21+05:00"}
+{"client_ip":"::1","duration":504700,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:03:21+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":1,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:03:28+05:00"}
+{"client_ip":"::1","duration":506200,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:03:28+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:03:40+05:00"}
+{"client_ip":"::1","duration":510700,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:03:40+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":1,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:03:49+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:03:49+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":3,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:04:12+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:04:12+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:04:23+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:04:23+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:05:08+05:00"}
+{"client_ip":"::1","duration":1027900,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:05:08+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:05:09+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:05:09+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:05:10+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:05:10+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:05:32+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:05:32+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":3,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:05:35+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:05:35+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":3,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:10:14+05:00"}
+{"client_ip":"::1","duration":766000,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:10:14+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":2,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:10:21+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:10:21+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":1,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:10:29+05:00"}
+{"client_ip":"::1","duration":0,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:10:29+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":2,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:10:47+05:00"}
+{"client_ip":"::1","duration":511600,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:10:47+05:00","user_agent":"PostmanRuntime/7.47.1"}
+{"count":1,"level":"info","msg":"Получен список подписок","time":"2025-09-22T17:10:52+05:00"}
+{"client_ip":"::1","duration":518000,"level":"info","method":"GET","msg":"HTTP request","path":"/subscriptions","status":200,"time":"2025-09-22T17:10:52+05:00","user_agent":"PostmanRuntime/7.47.1"}
