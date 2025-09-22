@@ -1,21 +1,24 @@
 package main
 
 import (
-	"log"
+	"context"
+	"fmt"
+	"os"
 	"subscription_service/pkg/config"
-	"subscription_service/pkg/router"
+	"subscription_service/pkg/handler"
+	"subscription_service/pkg/service"
+	"time"
 
-	//	_ "subscription_service_my/docs"
+	//	_ "subscription_service/docs"
 	"subscription_service/pkg/repository"
 
-	"github.com/joho/godotenv"
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
-
-var logger = logrus.New()
 
 // @title           Subscriptions Service API
 // @version         1.0
@@ -23,20 +26,13 @@ var logger = logrus.New()
 // @host localhost:8080
 // @BasePath        /
 
-func init() {
-	// Загрузка переменных окружения из файла .env
-	if err := godotenv.Load(); err != nil {
-		log.Print("Не найден .env файл")
-	}
-}
+var logger = logrus.New()
+var cfg = config.LoadConfig(logger)
 
 func main() {
 
-	// Инициализация переменных внешней среды
-	cfg := config.New()
-
 	// Инициализация логгера
-	openLogFiles, err := config.InitLogrus(cfg.LogLevel, logger)
+	openLogFiles, err := InitLogrus()
 	if err != nil {
 		logger.Error("Ошибка при настройке параметров логгера. Вывод всех ошибок будет осуществлён в консоль")
 	} else {
@@ -45,32 +41,133 @@ func main() {
 	}
 
 	// Создание нового подключения к БД
-	pool, err := repository.NewPostgresDB(cfg)
+	pool, connStr, err := connectToDB()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal("Ошибка подключения к БД: ", err)
 	}
-	logger.Info("Выполнено подключение к БД")
-
 	defer pool.Close()
 
 	// Миграция БД
-	err = repository.MigrateDB(cfg.ConString)
+	err = repository.MigrateDB(connStr)
 	if err != nil {
 		if err.Error() == "no change" {
 			logger.Info("Миграция БД не требуется")
 		} else {
-			logger.Fatal(err)
+			logger.Fatal("Ошибка миграции БД: ", err)
 		}
 	} else {
 		logger.Info("Выполнена миграция БД")
 	}
 
-	r := router.SetRouter(pool, logger)
+	// Инициализация зависимостей
+	subRepo := repository.NewSubRepo(pool, logger)
+	subService := service.NewSubService(subRepo, logger)
+	subHandler := handler.NewSubHandler(subService, logger)
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r := setRouter(subHandler)
 
-	err = r.Run(":" + cfg.HttpPort)
+	logger.Info("Запуск сервера на порту ", cfg.HTTPPort)
+	err = r.Run(":" + cfg.HTTPPort)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal("Ошибка запуска сервера: ", err)
+	}
+}
+
+func InitLogrus() (file *os.File, err error) {
+	// установим уровень логирования
+	switch cfg.LogLevel {
+	case "trace":
+		logger.SetLevel(logrus.TraceLevel)
+	case "debug":
+		logger.SetLevel(logrus.DebugLevel)
+	case "info":
+		logger.SetLevel(logrus.InfoLevel)
+	case "warn":
+		logger.SetLevel(logrus.WarnLevel)
+	case "error":
+		logger.SetLevel(logrus.ErrorLevel)
+	case "fatal":
+		logger.SetLevel(logrus.FatalLevel)
+	case "panic":
+		logger.SetLevel(logrus.PanicLevel)
+	default:
+		logger.SetLevel(logrus.InfoLevel)
+	}
+
+	// установим форматирование логов в джейсоне
+	logger.SetFormatter(&logrus.JSONFormatter{})
+
+	// установим вывод логов в файл
+	file, err = os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err == nil {
+		logger.SetOutput(file)
+		return file, nil
+	} else {
+		logger.Warn("Не удалось открыть файл логов, используется стандартный stderr")
+		return nil, err
+	}
+}
+
+func connectToDB() (*pgxpool.Pool, string, error) {
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBSSLMode)
+
+	confPool, err := pgxpool.ParseConfig(connStr)
+	if err != nil {
+		return nil, "", err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pool, err := pgxpool.NewWithConfig(ctx, confPool)
+	if err != nil {
+		return nil, "", err
+	}
+
+	// Проверка подключения
+	if err := pool.Ping(ctx); err != nil {
+		return nil, "", err
+	}
+
+	logger.Info("Выполнено подключение к БД")
+	return pool, connStr, nil
+}
+
+func setRouter(handler *handler.Handler) *gin.Engine {
+	rout := gin.New()
+	rout.Use(gin.Recovery())
+	rout.Use(loggingMiddleware())
+
+	// Swagger
+	rout.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Routes
+	sub := rout.Group("/subscriptions")
+	{
+		sub.POST("", handler.CreateSubscription)
+		//		sub.GET("", handler.ListSubscriptions)
+		//		sub.GET("/summary", handler.GetSummary)
+		//		sub.GET("/:id", handler.GetSubscription)
+		//		sub.PUT("/:id", handler.UpdateSubscription)
+		//		sub.DELETE("/:id", handler.DeleteSubscription)
+	}
+	return rout
+}
+
+func loggingMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+		duration := time.Since(start)
+
+		logger.WithFields(logrus.Fields{
+			"method":     c.Request.Method,
+			"path":       c.Request.URL.Path,
+			"status":     c.Writer.Status(),
+			"duration":   duration,
+			"client_ip":  c.ClientIP(),
+			"user_agent": c.Request.UserAgent(),
+		}).Info("HTTP request")
 	}
 }

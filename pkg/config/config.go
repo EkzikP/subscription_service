@@ -2,41 +2,47 @@ package config
 
 import (
 	"os"
+	"strconv"
 
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
-func InitLogrus(logLevel string, logger *logrus.Logger) (file *os.File, err error) {
-	// установим уровень логирования
-	switch logLevel {
-	case "trace":
-		logger.SetLevel(logrus.TraceLevel)
-	case "debug":
-		logger.SetLevel(logrus.DebugLevel)
-	case "info":
-		logger.SetLevel(logrus.InfoLevel)
-	case "warn":
-		logger.SetLevel(logrus.WarnLevel)
-	case "error":
-		logger.SetLevel(logrus.ErrorLevel)
-	case "fatal":
-		logger.SetLevel(logrus.FatalLevel)
-	case "panic":
-		logger.SetLevel(logrus.PanicLevel)
-	default:
-		logger.SetLevel(logrus.InfoLevel)
+type Config struct {
+	DBHost     string
+	DBPort     int
+	DBUser     string
+	DBPassword string
+	DBName     string
+	DBSSLMode  string
+	HTTPPort   string
+	LogLevel   string
+	LogFile    string
+}
+
+func LoadConfig(logger *logrus.Logger) *Config {
+	if err := godotenv.Load(); err != nil {
+		logger.Warn("Не найден .env файл")
 	}
 
-	// установим форматирование логов в джейсоне
-	logger.SetFormatter(&logrus.JSONFormatter{})
+	dbPort, _ := strconv.Atoi(getEnv("DB_PORT", "5432"))
 
-	// установим вывод логов в файл
-	file, err = os.OpenFile("logs/subscription.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err == nil {
-		logger.SetOutput(file)
-		return file, nil
-	} else {
-		logger.Info("Не удалось открыть файл логов, используется стандартный stderr")
-		return nil, err
+	return &Config{
+		DBHost:     getEnv("DB_HOST", "localhost"),
+		DBPort:     dbPort,
+		DBName:     getEnv("DB_NAME", "subscription_db"),
+		DBUser:     getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", "password"),
+		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
+		HTTPPort:   getEnv("HTTP_PORT", "8080"),
+		LogFile:    getEnv("LOG_FILE", "logs/app.log"),
+		LogLevel:   getEnv("LOG_LEVEL", "info"),
 	}
+}
+
+func getEnv(key, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
 }

@@ -1,0 +1,12 @@
+{"level":"info","msg":"Выполнено подключение к БД","time":"2025-09-22T14:25:31+05:00"}
+{"level":"info","msg":"Миграция БД не требуется","time":"2025-09-22T14:25:31+05:00"}
+{"level":"info","msg":"Запуск сервера на порту 8080","time":"2025-09-22T14:25:31+05:00"}
+{"level":"info","msg":"Выполнено подключение к БД","time":"2025-09-22T14:26:06+05:00"}
+{"level":"info","msg":"Миграция БД не требуется","time":"2025-09-22T14:26:06+05:00"}
+{"level":"info","msg":"Запуск сервера на порту 8080","time":"2025-09-22T14:26:06+05:00"}
+{"count":0,"level":"info","msg":"Получен список подписок","time":"2025-09-22T14:29:09+05:00"}
+{"level":"info","msg":"Запись о подписке успешно создана","serviceName":"Yandex Plus","time":"2025-09-22T14:29:09+05:00","userId":"60601fee-2bf1-4721-ae6f-7636e79a0cba"}
+{"client_ip":"::1","duration":7726400,"level":"info","method":"POST","msg":"HTTP request","path":"/subscriptions","status":201,"time":"2025-09-22T14:29:09+05:00","user_agent":"PostmanRuntime/7.43.4"}
+{"count":1,"level":"info","msg":"Получен список подписок","time":"2025-09-22T14:29:34+05:00"}
+{"level":"warning","msg":"Ошибка добавления записи, запись уже существует","time":"2025-09-22T14:29:34+05:00"}
+{"client_ip":"::1","duration":1055000,"level":"info","method":"POST","msg":"HTTP request","path":"/subscriptions","status":409,"time":"2025-09-22T14:29:34+05:00","user_agent":"PostmanRuntime/7.43.4"}
