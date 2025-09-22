@@ -147,6 +147,7 @@ func setRouter(handler *handler.Handler) *gin.Engine {
 	{
 		sub.POST("", handler.CreateSubscription)
 		sub.GET("", handler.ListSubscriptions)
+		sub.GET("/:user_id/:service_name", handler.GetSubscription)
 	}
 	return rout
 }

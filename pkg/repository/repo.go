@@ -13,6 +13,7 @@ import (
 type Repository interface {
 	List(ctx context.Context, userID *uuid.UUID, serviceName *string) ([]*model.Subscription, error)
 	Create(ctx context.Context, sub *model.Subscription) error
+	Get(ctx context.Context, userID *uuid.UUID, serviceName *string) (*model.Subscription, error)
 }
 
 type repo struct {
@@ -94,4 +95,21 @@ func (r *repo) Create(ctx context.Context, sub *model.Subscription) error {
 	}).Info("Запись о подписке успешно создана")
 
 	return nil
+}
+
+func (r *repo) Get(ctx context.Context, userID *uuid.UUID, serviceName *string) (*model.Subscription, error) {
+	query := `SELECT service_name, price, user_id, start_date, end_date 
+              FROM subscriptions WHERE user_id = $1 AND service_name = $2`
+
+	var sub model.Subscription
+	err := r.pool.QueryRow(ctx, query, userID, serviceName).Scan(
+		&sub.ServiceName, &sub.Price, &sub.UserID,
+		&sub.StartDate, &sub.EndDate,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &sub, nil
 }

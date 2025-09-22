@@ -14,6 +14,7 @@ import (
 type Service interface {
 	CreateSubscription(ctx context.Context, req *model.CreateSubscriptionRequest) error
 	ListSubscriptions(ctx context.Context, userID *uuid.UUID, serviceName *string) ([]*model.Subscription, error)
+	GetSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string) (*model.Subscription, error)
 }
 
 type subService struct {
@@ -59,4 +60,8 @@ func (s *subService) CreateSubscription(ctx context.Context, req *model.CreateSu
 
 func (s *subService) ListSubscriptions(ctx context.Context, userID *uuid.UUID, serviceName *string) ([]*model.Subscription, error) {
 	return s.repo.List(ctx, userID, serviceName)
+}
+
+func (s *subService) GetSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string) (*model.Subscription, error) {
+	return s.repo.Get(ctx, userID, serviceName)
 }
