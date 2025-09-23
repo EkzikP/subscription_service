@@ -17,7 +17,7 @@ type Service interface {
 	GetSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string) (*model.Subscription, error)
 	UpdateSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string, req *model.UpdateSubscriptionRequest) (*model.Subscription, error)
 	DeleteSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string) error
-	GetTotal(ctx context.Context, req *model.TotalRequest) (*model.TotalSubscription, error)
+	GetTotal(ctx context.Context, req *model.TotalRequest, userID *uuid.UUID) (*model.TotalResponse, error)
 }
 
 type subService struct {
@@ -31,7 +31,7 @@ func NewSubService(repo repository.Repository, logger *logrus.Logger) Service {
 
 func (s *subService) CreateSubscription(ctx context.Context, req *model.CreateSubscriptionRequest) error {
 
-	startDate, endDate, err := ParseDate(&req.StartDate, req.EndDate, s.logger)
+	startDate, endDate, err := ParseDate(&req.StartDate, req.EndDate)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (s *subService) GetSubscription(ctx context.Context, userID *uuid.UUID, ser
 
 func (s *subService) UpdateSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string, req *model.UpdateSubscriptionRequest) (*model.Subscription, error) {
 
-	startDate, endDate, err := ParseDate(req.StartDate, req.EndDate, s.logger)
+	startDate, endDate, err := ParseDate(req.StartDate, req.EndDate)
 	if err != nil {
 		return nil, err
 	}
@@ -81,25 +81,31 @@ func (s *subService) DeleteSubscription(ctx context.Context, userID *uuid.UUID, 
 	return s.repo.Delete(ctx, userID, serviceName)
 }
 
-func (s *subService) GetTotal(ctx context.Context, req *model.TotalRequest) (*model.TotalSubscription, error) {
+func (s *subService) GetTotal(ctx context.Context, req *model.TotalRequest, userID *uuid.UUID) (*model.TotalResponse, error) {
 
-	_, _, err := ParseDate(&req.StartPeriod, &req.EndPeriod, s.logger)
+	startPeriod, endPeriod, err := ParseDate(&req.StartPeriod, &req.EndPeriod)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.repo.GetTotal(ctx, req)
+	totalSubscription := &model.TotalSubscription{
+		UserID:      userID,
+		ServiceName: req.ServiceName,
+		StartPeriod: *startPeriod,
+		EndPeriod:   *endPeriod,
+	}
+
+	return s.repo.GetTotal(ctx, totalSubscription)
 }
 
-func ParseDate(startDayStr *string, endDayStr *string, logger *logrus.Logger) (*time.Time, *time.Time, error) {
+func ParseDate(startDayStr *string, endDayStr *string) (*time.Time, *time.Time, error) {
 	var startDate *time.Time
 	var endDate *time.Time
 
 	if startDayStr != nil {
 		parsedStartDate, err := time.Parse("01-2006", *startDayStr)
 		if err != nil {
-			logger.WithError(err).Error("Неверный формат даты начала подписки")
-			return startDate, endDate, fmt.Errorf("неверный формат даты начала подписки, ожидается формат MM-YYYY")
+			return startDate, endDate, fmt.Errorf("invalid startDate")
 		}
 		startDate = &parsedStartDate
 	}
@@ -107,8 +113,7 @@ func ParseDate(startDayStr *string, endDayStr *string, logger *logrus.Logger) (*
 	if endDayStr != nil {
 		parsedEndDate, err := time.Parse("01-2006", *endDayStr)
 		if err != nil {
-			logger.WithError(err).Error("Неверный формат даты окончания подписки")
-			return startDate, endDate, fmt.Errorf("неверный формат даты окончания подписки, ожидается формат MM-YYYY")
+			return startDate, endDate, fmt.Errorf("invalid endDate")
 		}
 		endDate = &parsedEndDate
 	}

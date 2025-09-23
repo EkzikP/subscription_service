@@ -17,6 +17,7 @@ type Repository interface {
 	Get(ctx context.Context, userID *uuid.UUID, serviceName *string) (*model.Subscription, error)
 	Update(ctx context.Context, updSub *model.UpdateSubscription) (*model.Subscription, error)
 	Delete(ctx context.Context, userID *uuid.UUID, serviceName *string) error
+	GetTotal(ctx context.Context, req *model.TotalSubscription) (*model.TotalResponse, error)
 }
 
 type repo struct {
@@ -78,7 +79,7 @@ func (r *repo) Create(ctx context.Context, sub *model.Subscription) error {
 	}
 
 	if len(exist) > 0 {
-		return fmt.Errorf("запись уже существует")
+		return fmt.Errorf("exists")
 	}
 
 	query := `INSERT INTO subscriptions (service_name, price, user_id, start_date, end_date) 
@@ -119,7 +120,7 @@ func (r *repo) Update(ctx context.Context, updSub *model.UpdateSubscription) (*m
 	query := `UPDATE subscriptions SET 
                 price = COALESCE($1, price),
                 start_date = COALESCE($2, start_date),
-                end_date = $3
+                end_date = COALESCE($3, end_date)
               WHERE user_id = $4 AND service_name = $5 RETURNING *`
 
 	var sub model.Subscription
@@ -146,4 +147,36 @@ func (r *repo) Delete(ctx context.Context, userID *uuid.UUID, serviceName *strin
 	}
 
 	return nil
+}
+
+func (r *repo) GetTotal(ctx context.Context, req *model.TotalSubscription) (*model.TotalResponse, error) {
+	query := `SELECT COALESCE(SUM(price), 0), COUNT(*) 
+              FROM subscriptions 
+              WHERE start_date <= $1 AND (end_date IS NULL OR end_date >= $2)`
+	args := []interface{}{req.EndPeriod, req.StartPeriod}
+	argCount := 3
+
+	if req.UserID != nil {
+		query += fmt.Sprintf(" AND user_id = $%d", argCount)
+		args = append(args, *req.UserID)
+		argCount++
+	}
+
+	if req.ServiceName != nil {
+		query += fmt.Sprintf(" AND service_name = $%d", argCount)
+		args = append(args, *req.ServiceName)
+	}
+
+	var total model.TotalResponse
+	err := r.pool.QueryRow(ctx, query, args...).Scan(&total.TotalCost, &total.Count)
+	if err != nil {
+		return nil, err
+	}
+
+	r.logger.WithFields(logrus.Fields{
+		"totalCost": total.TotalCost,
+		"count":     total.Count,
+	}).Info("Сумма и количество подписок получены")
+
+	return &total, nil
 }
