@@ -150,6 +150,7 @@ func setRouter(handler *handler.Handler) *gin.Engine {
 		sub.GET("/:user_id/:service_name", handler.GetSubscription)
 		sub.PUT("/:user_id/:service_name", handler.UpdateSubscription)
 		sub.DELETE("/:user_id/:service_name", handler.DeleteSubscription)
+		sub.GET("/total", handler.GetTotalSubscriptions)
 	}
 	return rout
 }

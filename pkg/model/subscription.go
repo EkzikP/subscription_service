@@ -38,3 +38,15 @@ type UpdateSubscription struct {
 	StartDate   *time.Time `json:"start_date,omitempty"`
 	EndDate     *time.Time `json:"end_date,omitempty"`
 }
+
+type TotalRequest struct {
+	UserID      *uuid.UUID `form:"user_id"`
+	ServiceName *string    `form:"service_name"`
+	StartPeriod string     `form:"start_period" binding:"required"`
+	EndPeriod   string     `form:"end_period" binding:"required"`
+}
+
+type TotalSubscription struct {
+	TotalCost int `json:"total_cost"`
+	Count     int `json:"count"`
+}

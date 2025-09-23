@@ -67,21 +67,12 @@ func (h *Handler) CreateSubscription(ctx *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /subscriptions [get]
 func (h *Handler) ListSubscriptions(ctx *gin.Context) {
-	var userID *uuid.UUID
-	var serviceName *string
 
-	if userIDStr := ctx.Query("user_id"); userIDStr != "" {
-		parsedUUID, err := uuid.Parse(userIDStr)
-		if err != nil {
-			h.logger.WithError(err).Warn("Неверный формат UserID")
-			ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Неверный формат UserID"})
-			return
-		}
-		userID = &parsedUUID
-	}
-
-	if serviceNameStr := ctx.Query("service_name"); serviceNameStr != "" {
-		serviceName = &serviceNameStr
+	userID, serviceName, err := getUserIDAndServiceNameFromQuery(ctx)
+	if err != nil {
+		h.logger.WithError(err).Warn("Неверный формат UserID")
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Неверный формат UserID"})
+		return
 	}
 
 	subscriptions, err := h.service.ListSubscriptions(ctx.Request.Context(), userID, serviceName)
@@ -108,7 +99,7 @@ func (h *Handler) ListSubscriptions(ctx *gin.Context) {
 // @Router /subscriptions/{user_id}/{service_name} [get]
 func (h *Handler) GetSubscription(ctx *gin.Context) {
 
-	userID, serviceName, err := getUserIDAndServiceName(ctx)
+	userID, serviceName, err := getUserIDAndServiceNameFromParam(ctx)
 	if err != nil {
 		h.logger.WithError(err).Warn("Неверный формат UserID")
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Неверный формат UserID"})
@@ -146,7 +137,7 @@ func (h *Handler) GetSubscription(ctx *gin.Context) {
 // @Router /subscriptions/{user_id}/{service_name} [put]
 func (h *Handler) UpdateSubscription(ctx *gin.Context) {
 
-	userID, serviceName, err := getUserIDAndServiceName(ctx)
+	userID, serviceName, err := getUserIDAndServiceNameFromParam(ctx)
 	if err != nil {
 		h.logger.WithError(err).Warn("Неверный формат UserID")
 		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Неверный формат UserID"})
@@ -189,7 +180,7 @@ func (h *Handler) UpdateSubscription(ctx *gin.Context) {
 // @Router /subscriptions/{user_id}/{service_name} [delete]
 func (h *Handler) DeleteSubscription(ctx *gin.Context) {
 
-	userID, serviceName, err := getUserIDAndServiceName(ctx)
+	userID, serviceName, err := getUserIDAndServiceNameFromParam(ctx)
 
 	if err != nil {
 		h.logger.WithError(err).Warn("Неверный формат UserID")
@@ -211,7 +202,48 @@ func (h *Handler) DeleteSubscription(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func getUserIDAndServiceName(ctx *gin.Context) (*uuid.UUID, *string, error) {
+// GetTotal godoc
+// @Summary Получить общую стоимость подписок
+// @Description Получите общую стоимость и количество подписок за определенный период с дополнительной фильтрацией
+// @Tags subscriptions
+// @Produce json
+// @Param user_id query string false "ID пользователя"
+// @Param service_name query string false "Наименование сервиса"
+// @Param start_period query string true "Начало периода (MM-YYYY)"
+// @Param end_period query string true "Конец периода (MM-YYYY)"
+// @Success 200 {object} model.SubscriptionTotal
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /subscriptions/total [get]
+func (h *Handler) GetTotalSubscriptions(ctx *gin.Context) {
+	var req model.TotalRequest
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		h.logger.WithError(err).Warn("Неверные параметры запроса")
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Неверные параметры запроса"})
+		return
+	}
+
+	userID, serviceName, err := getUserIDAndServiceNameFromQuery(ctx)
+	if err != nil {
+		h.logger.WithError(err).Warn("Неверный формат UserID")
+		ctx.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Неверный формат UserID"})
+		return
+	}
+
+	req.UserID = userID
+	req.ServiceName = serviceName
+
+	total, err := h.service.GetTotal(ctx.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, summary)
+}
+
+func getUserIDAndServiceNameFromParam(ctx *gin.Context) (*uuid.UUID, *string, error) {
 	var userID *uuid.UUID
 	var serviceName *string
 
@@ -226,5 +258,24 @@ func getUserIDAndServiceName(ctx *gin.Context) (*uuid.UUID, *string, error) {
 	if serviceNameStr := ctx.Param("service_name"); serviceNameStr != "" {
 		serviceName = &serviceNameStr
 	}
+	return userID, serviceName, nil
+}
+
+func getUserIDAndServiceNameFromQuery(ctx *gin.Context) (*uuid.UUID, *string, error) {
+	var userID *uuid.UUID
+	var serviceName *string
+
+	if userIDStr := ctx.Query("user_id"); userIDStr != "" {
+		parsedUUID, err := uuid.Parse(userIDStr)
+		if err != nil {
+			return nil, nil, err
+		}
+		userID = &parsedUUID
+	}
+
+	if serviceNameStr := ctx.Query("service_name"); serviceNameStr != "" {
+		serviceName = &serviceNameStr
+	}
+
 	return userID, serviceName, nil
 }

@@ -17,6 +17,7 @@ type Service interface {
 	GetSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string) (*model.Subscription, error)
 	UpdateSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string, req *model.UpdateSubscriptionRequest) (*model.Subscription, error)
 	DeleteSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string) error
+	GetTotal(ctx context.Context, req *model.TotalRequest) (*model.TotalSubscription, error)
 }
 
 type subService struct {
@@ -78,6 +79,16 @@ func (s *subService) UpdateSubscription(ctx context.Context, userID *uuid.UUID, 
 
 func (s *subService) DeleteSubscription(ctx context.Context, userID *uuid.UUID, serviceName *string) error {
 	return s.repo.Delete(ctx, userID, serviceName)
+}
+
+func (s *subService) GetTotal(ctx context.Context, req *model.TotalRequest) (*model.TotalSubscription, error) {
+
+	_, _, err := ParseDate(&req.StartPeriod, &req.EndPeriod, s.logger)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.repo.GetTotal(ctx, req)
 }
 
 func ParseDate(startDayStr *string, endDayStr *string, logger *logrus.Logger) (*time.Time, *time.Time, error) {
