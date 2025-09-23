@@ -142,12 +142,14 @@ func setRouter(handler *handler.Handler) *gin.Engine {
 	// Swagger
 	rout.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Routes
+	// Маршруты
 	sub := rout.Group("/subscriptions")
 	{
 		sub.POST("", handler.CreateSubscription)
 		sub.GET("", handler.ListSubscriptions)
 		sub.GET("/:user_id/:service_name", handler.GetSubscription)
+		sub.PUT("/:user_id/:service_name", handler.UpdateSubscription)
+		sub.DELETE("/:user_id/:service_name", handler.DeleteSubscription)
 	}
 	return rout
 }

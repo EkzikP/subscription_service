@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"subscription_service/pkg/model"
 
@@ -14,6 +15,8 @@ type Repository interface {
 	List(ctx context.Context, userID *uuid.UUID, serviceName *string) ([]*model.Subscription, error)
 	Create(ctx context.Context, sub *model.Subscription) error
 	Get(ctx context.Context, userID *uuid.UUID, serviceName *string) (*model.Subscription, error)
+	Update(ctx context.Context, updSub *model.UpdateSubscription) (*model.Subscription, error)
+	Delete(ctx context.Context, userID *uuid.UUID, serviceName *string) error
 }
 
 type repo struct {
@@ -102,14 +105,45 @@ func (r *repo) Get(ctx context.Context, userID *uuid.UUID, serviceName *string) 
               FROM subscriptions WHERE user_id = $1 AND service_name = $2`
 
 	var sub model.Subscription
-	err := r.pool.QueryRow(ctx, query, userID, serviceName).Scan(
-		&sub.ServiceName, &sub.Price, &sub.UserID,
-		&sub.StartDate, &sub.EndDate,
-	)
+	err := r.pool.QueryRow(ctx, query, userID, serviceName).
+		Scan(&sub.ServiceName, &sub.Price, &sub.UserID, &sub.StartDate, &sub.EndDate)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &sub, nil
+}
+
+func (r *repo) Update(ctx context.Context, updSub *model.UpdateSubscription) (*model.Subscription, error) {
+	query := `UPDATE subscriptions SET 
+                price = COALESCE($1, price),
+                start_date = COALESCE($2, start_date),
+                end_date = $3
+              WHERE user_id = $4 AND service_name = $5 RETURNING *`
+
+	var sub model.Subscription
+	err := r.pool.QueryRow(ctx, query, updSub.Price, updSub.StartDate, updSub.EndDate, updSub.UserID, updSub.ServiceName).
+		Scan(&sub.ServiceName, &sub.Price, &sub.UserID, &sub.StartDate, &sub.EndDate)
+	if err != nil {
+		return nil, err
+	}
+
+	return &sub, nil
+}
+
+func (r *repo) Delete(ctx context.Context, userID *uuid.UUID, serviceName *string) error {
+	query := "DELETE FROM subscriptions WHERE user_id = $1 AND service_name = $2"
+
+	result, err := r.pool.Exec(ctx, query, userID, serviceName)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		err := sql.ErrNoRows
+		return err
+	}
+
+	return nil
 }

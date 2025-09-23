@@ -24,3 +24,17 @@ type CreateSubscriptionRequest struct {
 	StartDate   string    `json:"start_date" binding:"required"`
 	EndDate     *string   `json:"end_date,omitempty"`
 }
+
+type UpdateSubscriptionRequest struct {
+	Price     *int    `json:"price,omitempty"`
+	StartDate *string `json:"start_date,omitempty"`
+	EndDate   *string `json:"end_date,omitempty"`
+}
+
+type UpdateSubscription struct {
+	ServiceName string     `json:"service_name" binding:"required"`
+	UserID      uuid.UUID  `json:"user_id" binding:"required"`
+	Price       *int       `json:"price,omitempty"`
+	StartDate   *time.Time `json:"start_date,omitempty"`
+	EndDate     *time.Time `json:"end_date,omitempty"`
+}
