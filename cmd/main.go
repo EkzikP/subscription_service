@@ -9,7 +9,7 @@ import (
 	"subscription_service/pkg/service"
 	"time"
 
-	//	_ "subscription_service/docs"
+	_ "subscription_service/docs"
 	"subscription_service/pkg/repository"
 
 	"github.com/gin-gonic/gin"
@@ -135,6 +135,7 @@ func connectToDB() (*pgxpool.Pool, string, error) {
 }
 
 func setRouter(handler *handler.Handler) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	rout := gin.New()
 	rout.Use(gin.Recovery())
 	rout.Use(loggingMiddleware())

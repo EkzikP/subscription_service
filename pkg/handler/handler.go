@@ -229,7 +229,7 @@ func (h *Handler) DeleteSubscription(ctx *gin.Context) {
 // @Param service_name query string false "Наименование сервиса"
 // @Param start_period query string true "Начало периода (MM-YYYY)"
 // @Param end_period query string true "Конец периода (MM-YYYY)"
-// @Success 200 {object} model.SubscriptionTotal
+// @Success 200 {object} model.TotalResponse
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 500 {object} model.ErrorResponse
 // @Router /subscriptions/total [get]
