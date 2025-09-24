@@ -31,6 +31,7 @@ func NewSubHandler(service service.Service, logger *logrus.Logger) *Handler {
 // @Success 201 {object} nil
 // @Failure 400 {object} model.ErrorResponse
 // @Failure 409 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
 // @Router /subscriptions [post]
 func (h *Handler) CreateSubscription(ctx *gin.Context) {
 	var req model.CreateSubscriptionRequest
