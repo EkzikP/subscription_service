@@ -66,8 +66,8 @@ func main() {
 
 	r := setRouter(subHandler)
 
-	logger.Info("Запуск сервера на порту ", cfg.HTTPPort)
-	err = r.Run(":" + cfg.HTTPPort)
+	logger.Info("Запуск сервера на порту ", 8080)
+	err = r.Run(":" + "8080")
 	if err != nil {
 		logger.Fatal("Ошибка запуска сервера: ", err)
 	}

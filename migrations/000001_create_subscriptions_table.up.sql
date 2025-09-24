@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS subscriptions(
 
 CREATE INDEX IF NOT EXISTS subscriptions_user_id_idx ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS subscriptions_service_name_idx ON subscriptions(service_name);
-CREATE INDEX subscriptions_dates_idx ON subscriptions(start_date, end_date);
+CREATE INDEX IF NOT EXISTS subscriptions_dates_idx ON subscriptions(start_date, end_date);

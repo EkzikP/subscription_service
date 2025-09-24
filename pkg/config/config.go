@@ -15,7 +15,6 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	DBSSLMode  string
-	HTTPPort   string
 	LogLevel   string
 	LogFile    string
 }
@@ -34,7 +33,6 @@ func LoadConfig(logger *logrus.Logger) *Config {
 		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", "password"),
 		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
-		HTTPPort:   getEnv("HTTP_PORT", "8080"),
 		LogFile:    getEnv("LOG_FILE", "logs/app.log"),
 		LogLevel:   getEnv("LOG_LEVEL", "info"),
 	}

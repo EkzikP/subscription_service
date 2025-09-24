@@ -8,7 +8,7 @@ import (
 
 func MigrateDB(connString string) error {
 	m, err := migrate.New(
-		"file://pkg/repository/migrations",
+		"file://migrations",
 		connString)
 	if err != nil {
 		return err
