@@ -78,9 +78,7 @@ docker-compose up --build
 
 ## Доступ к API
 
-Основное API: `http://localhost:8080/subscriptions
-
-`
+Основное API: `http://localhost:8080/subscriptions`
 
 Swagger документация: `http://localhost:8080/swagger/index.html`
 
